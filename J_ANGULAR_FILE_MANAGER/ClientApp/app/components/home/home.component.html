@@ -1,0 +1,155 @@
+<div class="page-header">
+    <h1>
+        Web File
+        <small>
+            File list
+            <p-fileUpload #fubauto mode="basic" name="demo[]" [name]="ref_" url="/api/jfiles/upload5"
+                          accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.csv,.txt,.rtf,.zip,.mp3,.wma,.mpg,.flv,.avi"
+                          maxFileSize="100000000" (onUpload)="onUpload($event)"
+                          auto="true"></p-fileUpload>
+        </small>
+    </h1>
+</div>
+
+
+
+<!-- popup start  -->
+<p-growl [(value)]="msgs"></p-growl>
+<p-confirmDialog width="425"></p-confirmDialog>
+<p-dialog header="Add Folder" [(visible)]="addDisplay" modal="modal" width="350" [responsive]="true">
+    <form #newForm="ngForm" (ngSubmit)="onNew()">
+        <div>
+            <div class="form-group">
+                <label for="newfolder">New Folder</label>
+                <input type="text"
+                       id="newfolder" name="newfolder" #newfolder="ngModel"
+                       [(ngModel)]="newfolderE"
+                       required minlength="2" maxlength="30"
+                       class="form-control" placeholder="New Folder" />
+
+                <div *ngIf="newfolder.errors && (newfolder.dirty || newfolder.touched)"
+                     class="alert alert-danger">
+                    <div [hidden]="!newfolder.errors.required">
+                        title is required
+                    </div>
+                    <div [hidden]="!newfolder.errors.minlength">
+                        title must be at least 2 characters long.
+                    </div>
+                    <div [hidden]="!newfolder.errors.maxlength">
+                        title cannot be more than 30 characters long.
+                    </div>
+                </div>
+
+            </div>
+        </div>
+        <p-footer>
+            <div class="ui-dialog-buttonpane ui-widget-content ui-helper-clearfix">
+                <button type="button" pButton icon="fa-close" (click)="addDisplay=false" label="No"></button>
+                <button type="submit" pButton icon="fa-check" [disabled]="!newForm.form.valid" label="Yes"></button>
+            </div>
+        </p-footer>
+    </form>
+</p-dialog>
+<p-dialog header="DownLoad File Name" [(visible)]="downdisplay" modal="modal" width="350" [responsive]="true">
+    <span>
+        <input id="in" type="text" size="30"
+               required minlength="2" maxlength="30"
+               pInputText [(ngModel)]="downtext" />
+    </span>
+    <p-footer>
+        <div class="ui-dialog-buttonpane ui-widget-content ui-helper-clearfix">
+            <button type="button" pButton icon="fa-close" (click)="downdisplay=false" label="No"></button>
+            <button type="button" pButton icon="fa-check" (click)="downGo();downdisplay=false" label="Yes"></button>
+        </div>
+    </p-footer>
+</p-dialog>
+<p-dialog header="Re Name" [(visible)]="redisplay" modal="modal" width="350" [responsive]="true">
+    <form #reForm="ngForm" (ngSubmit)="onRe()">
+        <div>
+            <div class="form-group">
+                <label for="reName">Re Name</label>
+                <input type="text"
+                       id="reName" name="reName" #reName="ngModel"
+                       [(ngModel)]="retext"
+                       required minlength="2" maxlength="30"
+                       class="form-control" placeholder="Re Name" />
+
+                <div *ngIf="reName.errors && (reName.dirty || reName.touched)"
+                     class="alert alert-danger">
+                    <div [hidden]="!reName.errors.required">
+                        title is required
+                    </div>
+                    <div [hidden]="!reName.errors.minlength">
+                        title must be at least 2 characters long.
+                    </div>
+                    <div [hidden]="!reName.errors.maxlength">
+                        title cannot be more than 30 characters long.
+                    </div>
+                </div>
+
+            </div>
+        </div>
+        <p-footer>
+            <div class="ui-dialog-buttonpane ui-widget-content ui-helper-clearfix">
+                <button type="button" pButton icon="fa-close" (click)="redisplay=false" label="No"></button>
+                <button type="submit" pButton icon="fa-check" [disabled]="!reForm.form.valid" label="Yes"></button>
+            </div>
+        </p-footer>
+    </form>
+</p-dialog>
+<!-- popup end  -->
+<!-- files start  -->
+<div class="ui-g">
+    <div class="col-sm-12">
+        <p-breadcrumb [model]="items"></p-breadcrumb>
+    </div>
+</div>
+<div class="ui-g">
+    <div class="col-sm-2 col-xs-12">
+        <div style="margin-top: 8px">
+            <button pButton icon="fa-plus-square" label="Expand all" (click)="expandAll()"></button>
+            <button pButton icon="fa-minus-square" label="Collapse all" (click)="collapseAll()"></button>
+            <button pButton icon="fa-edit" label="Add Folder" (click)="addDisplay=true"></button>
+        </div>
+        <p-tree #expandingTree
+                selectionMode="single"
+                [(selection)]="selectedFile"
+                (onNodeSelect)="nodeSelect($event)"
+                (onNodeUnselect)="nodeUnselect($event)"
+                [value]="filesTree10"
+                [style]="{'width':'100%'}">
+        </p-tree>
+    </div>
+    <div class="col-sm-10 col-xs-12">
+        <p-dataTable [value]="files" [style]="{'width':'100%'}">
+            <p-column styleClass="col-button">
+                <ng-template pTemplate="header">
+                    Name
+                </ng-template>
+                <ng-template let-car="rowData" pTemplate="body">
+                    <a (click)="goData(car)"> {{car.label}}</a>
+                </ng-template>
+            </p-column>
+            <p-column field="size" header="Size"></p-column>
+            <p-column field="typem" header="Type"></p-column>
+            <p-column field="datem" header="Date Modified"></p-column>
+            <p-column styleClass="col-button">
+                <ng-template pTemplate="header">
+                    <button type="button" pButton (click)="reload()" icon="fa-refresh"></button>
+                </ng-template>
+                <ng-template let-car="rowData" pTemplate="body">
+                    <div style="text-align:right" [hidden]="!car.leaf">
+                        <button type="button" pButton (click)="downRename1(car.data,car.label)" icon="fa-edit"></button>
+                        <button type="button" pButton (click)="delData(car)" icon="fa-trash "></button>
+                    </div>
+                    <div style="text-align:right" [hidden]="car.leaf">
+                        <button type="button" pButton (click)="downRename2(car.data,car.label)" icon="fa-edit"></button>
+                        <button type="button" pButton (click)="downData2(car.data,car.label)" icon="fa-cloud-download"></button>
+                        <button type="button" pButton (click)="delData(car)" icon="fa-trash "></button>
+                    </div>
+                </ng-template>
+            </p-column>
+        </p-dataTable>
+    </div>
+</div>
+<!-- files end  -->
